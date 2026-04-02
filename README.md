@@ -44,6 +44,4 @@ General notes:
 - Project 5 requires `curl` at runtime.
 - Project 1 runs in Tinkercad/Arduino environment.
 
-## Suggested Submission Structure
 
-Submit each project folder as-is with source code, data/examples, and its local `README.txt`.
