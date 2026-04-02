@@ -1,0 +1,38 @@
+Project 1 Test Checklist
+
+A. Startup Test
+- Expected: A starts GREEN, B starts RED.
+- Expected: Menu appears in Serial Monitor.
+
+B. Sensor Detection Test
+- Press BTN_A once.
+- Expected: Vehicles count for A increments.
+- Expected: A gets extended green window on next/active cycle.
+
+C. Non-blocking Concurrency Test
+- While lights are cycling, send menu command '1'.
+- Expected: Status prints immediately without stopping light transitions.
+- Send menu command '7' repeatedly while cycling.
+- Expected: log interval toggles (1000/2000/5000 ms) without freezing scheduling.
+
+D. Manual Override Test
+- Send '3'. Expected: A GREEN and B RED immediately.
+- Send '4'. Expected: B GREEN and A RED immediately.
+- Send '2'. Expected: Return to auto scheduling.
+
+E. Error Guard Test
+- Observe logs over time.
+- Expected: No persistent state where both intersections are GREEN.
+- If simultaneous GREEN detected transiently, guard forces B to RED and logs warning.
+
+F. Counter Reset Test
+- Send '5'.
+- Expected: vehicle/cycle counters reset to 0.
+
+G. Logging Test
+- Expected: periodic CSV-like logs every ~2 seconds.
+- Example format: LOG,<millis>,Intersection A,<state>,V=<n>,C=<n>,Intersection B,<state>,V=<n>,C=<n>
+
+H. Coordinated Phase Safety Test
+- Observe 2 full auto cycles.
+- Expected: only one intersection is GREEN at any moment (A/B alternate phases).

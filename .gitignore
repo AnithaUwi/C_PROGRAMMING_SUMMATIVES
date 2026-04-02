@@ -1,0 +1,17 @@
+# Build artifacts
+*.exe
+*.out
+*.o
+*.obj
+
+# Logs and runtime artifacts
+*.log
+*.pid
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Keep output folders, ignore generated web scraper pages
+project5_multithreaded_web_scraper/output/*.html

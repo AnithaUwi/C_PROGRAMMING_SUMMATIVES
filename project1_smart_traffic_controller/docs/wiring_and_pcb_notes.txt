@@ -1,0 +1,28 @@
+Tinkercad / EasyEDA Wiring Plan
+
+Microcontroller: Arduino UNO (ATmega328P)
+
+Intersection A LEDs
+- Red LED anode -> D2 through 220 ohm resistor; cathode -> GND
+- Yellow LED anode -> D3 through 220 ohm resistor; cathode -> GND
+- Green LED anode -> D4 through 220 ohm resistor; cathode -> GND
+
+Intersection B LEDs
+- Red LED anode -> D5 through 220 ohm resistor; cathode -> GND
+- Yellow LED anode -> D6 through 220 ohm resistor; cathode -> GND
+- Green LED anode -> D7 through 220 ohm resistor; cathode -> GND
+
+Vehicle Buttons (INPUT_PULLUP active low)
+- Button A: one side -> D8, other side -> GND
+- Button B: one side -> D9, other side -> GND
+
+Power
+- Use Arduino 5V and GND rails properly in both Tinkercad and EasyEDA schematic.
+
+EasyEDA PCB Notes
+1. Place ATmega328P/Arduino footprint, 6 LEDs, 6x220 ohm resistors, 2 push buttons.
+2. Label nets exactly as firmware pins D2-D9.
+3. Keep LED-resistor chains close to output headers.
+4. Route button traces short and away from LED current paths where possible.
+5. Add silkscreen labels: A_R, A_Y, A_G, B_R, B_Y, B_G, BTN_A, BTN_B.
+6. Run ERC/DRC and fix all warnings/errors before export.
