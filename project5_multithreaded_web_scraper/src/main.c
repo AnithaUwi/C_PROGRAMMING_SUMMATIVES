@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #define MAX_URL_LEN 2048
 #define MAX_PATH_LEN 512
@@ -64,15 +65,22 @@ static void sanitize_filename_component(const char *url, char *out, size_t outSi
 }
 
 static int ensure_output_dir_exists(void) {
-    char cmd[128];
-    snprintf(cmd, sizeof(cmd), "mkdir -p %s 2>&1", OUTPUT_DIR);
-    fprintf(stderr, "[INIT] Creating output directory: %s\n", OUTPUT_DIR);
-    int rc = system(cmd);
-    fprintf(stderr, "[INIT] mkdir result: %d\n", rc);
-    if (rc != 0 && rc != -1) {
-        fprintf(stderr, "[INIT] Warning: mkdir returned %d (folder may already exist)\n", rc);
+    if (mkdir(OUTPUT_DIR, 0755) == 0) {
+        return 1;
     }
-    return 1;
+
+    if (errno == EEXIST) {
+        struct stat st;
+        if (stat(OUTPUT_DIR, &st) == 0 && S_ISDIR(st.st_mode)) {
+            return 1;
+        }
+    }
+
+    fprintf(stderr,
+            "Error: Could not create or access output directory '%s': %s\n",
+            OUTPUT_DIR,
+            strerror(errno));
+    return 0;
 }
 
 static void *fetch_worker(void *arg) {
@@ -95,11 +103,17 @@ static void *fetch_worker(void *arg) {
              task->url,
              outPath);
 
-    fprintf(stderr, "[Thread %d] Running: %s\n", task->threadIndex, cmd);
-
     int rc = system(cmd);
     if (rc != 0) {
-        fprintf(stderr, "[Thread %d] Fetch failed for %s (curl exit=%d)\n", task->threadIndex, task->url, rc);
+        int exitCode = rc;
+        if (rc != -1 && WIFEXITED(rc)) {
+            exitCode = WEXITSTATUS(rc);
+        }
+        fprintf(stderr,
+                "[Thread %d] Fetch failed for %s (curl exit=%d)\n",
+                task->threadIndex,
+                task->url,
+                exitCode);
         return NULL;
     }
 
