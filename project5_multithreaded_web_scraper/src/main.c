@@ -64,19 +64,14 @@ static void sanitize_filename_component(const char *url, char *out, size_t outSi
 }
 
 static int ensure_output_dir_exists(void) {
-    if (mkdir(OUTPUT_DIR, 0755) == 0) {
-        return 1;
+    char cmd[128];
+    snprintf(cmd, sizeof(cmd), "mkdir -p %s", OUTPUT_DIR);
+    int rc = system(cmd);
+    if (rc == -1) {
+        fprintf(stderr, "Could not execute mkdir command.\n");
+        return 0;
     }
-
-    if (errno == EEXIST) {
-        struct stat st;
-        if (stat(OUTPUT_DIR, &st) == 0 && S_ISDIR(st.st_mode)) {
-            return 1;
-        }
-    }
-
-    fprintf(stderr, "Could not create or access output directory '%s': %s\n", OUTPUT_DIR, strerror(errno));
-    return 0;
+    return 1;
 }
 
 static void *fetch_worker(void *arg) {
@@ -98,6 +93,8 @@ static void *fetch_worker(void *arg) {
              "curl -L --max-time 30 --connect-timeout 10 --silent --show-error \"%s\" -o \"%s\"",
              task->url,
              outPath);
+
+    fprintf(stderr, "[Thread %d] Running: %s\n", task->threadIndex, cmd);
 
     int rc = system(cmd);
     if (rc != 0) {
