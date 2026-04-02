@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #define MAX_URL_LEN 2048
 #define MAX_PATH_LEN 512
@@ -59,6 +61,22 @@ static void sanitize_filename_component(const char *url, char *out, size_t outSi
     }
 
     out[j] = '\0';
+}
+
+static int ensure_output_dir_exists(void) {
+    if (mkdir(OUTPUT_DIR, 0755) == 0) {
+        return 1;
+    }
+
+    if (errno == EEXIST) {
+        struct stat st;
+        if (stat(OUTPUT_DIR, &st) == 0 && S_ISDIR(st.st_mode)) {
+            return 1;
+        }
+    }
+
+    fprintf(stderr, "Could not create or access output directory '%s': %s\n", OUTPUT_DIR, strerror(errno));
+    return 0;
 }
 
 static void *fetch_worker(void *arg) {
@@ -185,6 +203,10 @@ static void free_urls(char **urls, size_t count) {
 
 int main(int argc, char **argv) {
     const char *urlFile = (argc > 1) ? argv[1] : DEFAULT_URL_FILE;
+
+    if (!ensure_output_dir_exists()) {
+        return 1;
+    }
 
     char **urls = NULL;
     size_t urlCount = 0;
