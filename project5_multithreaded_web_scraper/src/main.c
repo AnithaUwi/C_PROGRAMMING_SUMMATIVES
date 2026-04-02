@@ -65,11 +65,12 @@ static void sanitize_filename_component(const char *url, char *out, size_t outSi
 
 static int ensure_output_dir_exists(void) {
     char cmd[128];
-    snprintf(cmd, sizeof(cmd), "mkdir -p %s", OUTPUT_DIR);
+    snprintf(cmd, sizeof(cmd), "mkdir -p %s 2>&1", OUTPUT_DIR);
+    fprintf(stderr, "[INIT] Creating output directory: %s\n", OUTPUT_DIR);
     int rc = system(cmd);
-    if (rc == -1) {
-        fprintf(stderr, "Could not execute mkdir command.\n");
-        return 0;
+    fprintf(stderr, "[INIT] mkdir result: %d\n", rc);
+    if (rc != 0 && rc != -1) {
+        fprintf(stderr, "[INIT] Warning: mkdir returned %d (folder may already exist)\n", rc);
     }
     return 1;
 }
